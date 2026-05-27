@@ -1,0 +1,86 @@
+---
+import type { Lang } from '../i18n/ui';
+import { useTranslations } from '../i18n/ui';
+import { getSite } from '../data/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const site = getSite(lang);
+---
+
+<section class="section about" id="about">
+  <div class="wrap">
+    <div class="rule reveal">
+      <span class="label section-index is-accent">02 — {t('sec.about')}</span>
+      <span class="meta section-index">{site.about.location}</span>
+    </div>
+
+    <div class="grid">
+      <img
+        class="portrait reveal from-left"
+        src="/portrait.jpg"
+        alt={lang === 'zh' ? '我的猫' : 'my cats'}
+        loading="lazy"
+        decoding="async"
+        onerror="this.classList.add('broken');this.removeAttribute('src');"
+      />
+      <div class="reveal from-right">
+        <h2 class="serif">{site.about.title}</h2>
+        <div class="bio">
+          {site.about.bio.map((p) => <p>{p}</p>)}
+        </div>
+        <ul class="chips">
+          {site.about.facts.map((f) => <li>{f}</li>)}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: clamp(32px, 5vw, 60px);
+    align-items: start;
+  }
+  .portrait {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 16px;
+    object-fit: cover; object-position: center 62%;
+    /* fallback gradient placeholder if image 404s */
+    background:
+      radial-gradient(120% 100% at 30% 20%, rgba(230, 201, 132, .22), transparent 55%),
+      radial-gradient(120% 100% at 80% 90%, rgba(156, 180, 255, .30), transparent 60%),
+      linear-gradient(135deg, #1b1638 0%, #261b48 50%, #142046 100%);
+    box-shadow:
+      0 24px 60px -28px rgba(0, 0, 0, .7),
+      inset 0 0 0 1px var(--glass-line);
+  }
+  .portrait.broken { color: transparent; }
+  .portrait.broken::before { content: ""; }
+
+  h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(26px, 3.2vw, 36px); line-height: 1.18;
+    color: var(--ink-star); max-width: 22ch;
+  }
+  .bio { margin-top: 22px; }
+  .bio p { font-size: 16px; line-height: 1.78; color: var(--ink-soft); max-width: 58ch; }
+  .bio p + p { margin-top: 14px; }
+
+  .chips { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 9px; }
+  .chips li {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-soft);
+    border: 1px solid var(--glass-line);
+    padding: 6px 11px; border-radius: 999px;
+  }
+
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+    .portrait { max-width: 320px; }
+  }
+</style>

@@ -1,0 +1,24 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ProjectDetail from '../../../components/ProjectDetail.astro';
+import { getProjects, getSite } from '../../../data/content';
+import type { Project } from '../../../data/content';
+
+const lang = 'en' as const;
+
+export function getStaticPaths() {
+  const projects = getProjects('en');
+  return projects.map((p, i) => ({
+    params: { slug: p.slug },
+    props: { project: p, next: projects[(i + 1) % projects.length] },
+  }));
+}
+
+interface Props { project: Project; next: Project }
+const { project, next } = Astro.props;
+const site = getSite(lang);
+---
+
+<Base lang={lang} title={`${project.title} · ${site.name}`} description={project.summary}>
+  <ProjectDetail lang={lang} project={project} next={next} />
+</Base>

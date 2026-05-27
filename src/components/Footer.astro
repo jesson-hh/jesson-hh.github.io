@@ -1,0 +1,65 @@
+---
+import type { Lang } from '../i18n/ui';
+import { getSite } from '../data/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const site = getSite(lang);
+const year = new Date().getFullYear();
+const cta = lang === 'zh' ? '写封邮件给我 →' : 'Drop me an email →';
+const location = lang === 'zh' ? 'in Wuhan' : 'in Wuhan';
+---
+
+<footer class="foot" id="contact">
+  <div class="wrap">
+    <p class="cta serif reveal from-scale">
+      <span set:html={site.contact.ctaHtml}></span><br />
+      <a href={`mailto:${site.contact.email}`}>{cta}</a>
+    </p>
+    <div class="row">
+      <nav class="links mono" aria-label="Social">
+        {site.contact.links.map((l) => <a href={l.href}>{l.label}</a>)}
+      </nav>
+      <span class="copy mono">© {year} {site.name} · {site.person} · {location}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    margin-top: 60px;
+    padding-block: clamp(60px, 8vw, 100px);
+    border-top: 1px solid var(--glass-line);
+    background: linear-gradient(180deg, transparent, rgba(5, 8, 22, .6));
+  }
+  .cta {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(28px, 4.4vw, 48px); line-height: 1.12;
+    color: var(--ink-star); max-width: 18ch;
+  }
+  .cta a {
+    color: var(--accent-gold);
+    text-decoration: underline;
+    text-underline-offset: 6px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(230, 201, 132, .5);
+    transition: text-decoration-color .2s var(--ease);
+  }
+  .cta a:hover { text-decoration-color: var(--accent-gold); }
+
+  .row {
+    margin-top: 48px;
+    display: flex; justify-content: space-between; flex-wrap: wrap;
+    gap: 18px; align-items: baseline;
+  }
+  .links { display: flex; gap: 22px; }
+  .links a {
+    font-size: 12.5px; color: var(--ink-soft);
+    transition: color .18s var(--ease);
+  }
+  .links a:hover { color: var(--accent-gold); }
+  .copy {
+    font-size: 11px; color: var(--muted); letter-spacing: .06em;
+  }
+  .copy::before { content: "✦ "; color: var(--accent-gold); }
+</style>

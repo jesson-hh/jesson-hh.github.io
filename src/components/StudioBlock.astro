@@ -1,0 +1,75 @@
+---
+import type { Lang } from '../i18n/ui';
+import { getSite } from '../data/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const site = getSite(lang);
+---
+
+<section class="section" id="studio">
+  <div class="wrap">
+    <div class="orion-mark">
+      <div class="belt" aria-hidden="true"><span></span><span></span><span></span></div>
+      <h2 class="orion-word serif">{site.studioName}</h2>
+      <p class="orion-label mono">{site.role}</p>
+    </div>
+
+    <div class="card">
+      <h3 class="serif" set:html={site.studio.headlineHtml}></h3>
+      {site.studio.body.map((p) => <p>{p}</p>)}
+      {site.studio.note && <p class="note mono">{site.studio.note}</p>}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---- prominent Orion wordmark (Orion's-belt motif) ---- */
+  .orion-mark { padding: 8px 0 32px; }
+  .belt { display: flex; gap: 13px; margin-bottom: 18px; }
+  .belt span {
+    width: 8px; height: 8px; background: var(--accent); transform: rotate(45deg);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  .belt span:nth-child(2) { margin-top: 5px; }
+  .belt span:nth-child(3) { margin-top: 10px; }
+  .orion-word {
+    font-weight: 380;
+    font-size: clamp(54px, 11vw, 116px);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  .orion-label {
+    margin-top: 12px;
+    font-size: 12.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+  }
+
+  /* ---- single-column prose card (editorial, no services list) ---- */
+  .card {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: clamp(30px, 4.4vw, 52px) clamp(28px, 4vw, 48px);
+    max-width: 720px;
+  }
+  h3 {
+    font-weight: 400;
+    font-size: clamp(22px, 2.8vw, 30px);
+    line-height: 1.3;
+    letter-spacing: -.005em;
+  }
+  h3 :global(em) { font-style: italic; color: var(--accent); }
+  .card p {
+    margin-top: 18px;
+    font-size: 16px;
+    line-height: 1.78;
+    color: var(--ink-soft);
+  }
+  .card .note {
+    margin-top: 26px;
+    font-size: 12.5px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+</style>

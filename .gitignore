@@ -1,0 +1,32 @@
+# build output
+dist/
+# generated types & cache
+.astro/
+# dependencies
+node_modules/
+# logs
+*.log
+npm-debug.log*
+# environment
+.env
+.env.production
+.env.local
+# os
+.DS_Store
+Thumbs.db
+# brainstorm scratch (visual companion sessions)
+.superpowers/
+# session-local tooling state
+.claude/
+.codesearch.db/
+docs/superpowers/
+# design exploration scratch (kept locally, not deployed)
+_explorations/
+public/_explorations/
+myhost/
+myhost.zip
+dream-stars/
+dream-stars.zip
+# editors
+.idea/
+.vscode/

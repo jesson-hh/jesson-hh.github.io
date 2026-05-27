@@ -1,0 +1,171 @@
+---
+import type { Lang } from '../i18n/ui';
+import { getSite } from '../data/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const site = getSite(lang);
+
+/* Split brand name into letters so each can stagger-fall into place. */
+const letters = Array.from(site.name);
+---
+
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-veil"></div>
+
+  <div class="hero-content">
+    <div class="wrap">
+      <p class="coords hero-entrance d1">{site.coords}</p>
+
+      <h1 class="brand-big">
+        <span class="word">
+          {letters.map((ch, i) => (
+            <span class={`ltr l${i + 1}`}>{ch}</span>
+          ))}
+        </span>
+        <svg class="constellation-mini" viewBox="0 0 100 130" fill="none" stroke="rgba(230,201,132,.55)" stroke-width=".6">
+          <line x1="22" y1="32" x2="42" y2="60"/>
+          <line x1="78" y1="28" x2="62" y2="68"/>
+          <line x1="42" y1="60" x2="52" y2="64"/>
+          <line x1="52" y1="64" x2="62" y2="68"/>
+          <line x1="42" y1="60" x2="28" y2="100"/>
+          <line x1="62" y1="68" x2="78" y2="108"/>
+          <line x1="28" y1="100" x2="50" y2="118"/>
+          <line x1="78" y1="108" x2="50" y2="118"/>
+          <circle cx="22" cy="32" r="2.4" fill="#ff8a5e"/>
+          <circle cx="78" cy="28" r="1.6" fill="#fff"/>
+          <circle cx="42" cy="60" r="1.5" fill="#e6c984"/>
+          <circle cx="52" cy="64" r="1.7" fill="#e6c984"/>
+          <circle cx="62" cy="68" r="1.5" fill="#e6c984"/>
+          <circle cx="28" cy="100" r="1.4" fill="#9cb4ff"/>
+          <circle cx="78" cy="108" r="2.2" fill="#9cb4ff"/>
+          <circle cx="50" cy="118" r="1.0" fill="#fff"/>
+          <text x="10" y="32" font-family="JetBrains Mono" font-size="3" fill="rgba(255,255,255,.4)" text-anchor="end" stroke="none">α</text>
+          <text x="86" y="28" font-family="JetBrains Mono" font-size="3" fill="rgba(255,255,255,.4)" stroke="none">γ</text>
+          <text x="86" y="108" font-family="JetBrains Mono" font-size="3" fill="rgba(255,255,255,.4)" stroke="none">β</text>
+        </svg>
+      </h1>
+
+      <p class="brand-sub hero-entrance d3">{site.role}</p>
+
+      <p class="ethos hero-entrance d4" set:html={site.hero.headlineHtml}></p>
+
+      <p class="lede hero-entrance d5">{site.hero.lede}</p>
+    </div>
+  </div>
+</header>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background-image: url('/stars/hero.svg');
+    background-size: cover; background-position: center 40%;
+    opacity: .48;
+    filter: saturate(1.1) contrast(1.05);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+  }
+  .hero-veil {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(5, 8, 22, .32) 0%, rgba(5, 8, 22, .06) 28%, transparent 65%),
+      radial-gradient(80% 70% at 30% 38%, transparent 42%, rgba(5, 8, 22, .28) 92%);
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    padding: 60px 0 120px;
+  }
+  .hero-content .wrap { display: block; }
+
+  .coords {
+    font-family: var(--mono);
+    font-size: 11px; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--accent-gold);
+    display: flex; gap: 12px; align-items: center;
+    margin-bottom: 36px;
+  }
+  .coords::before {
+    content: "";
+    display: inline-block; width: 36px; height: 1px;
+    background: var(--accent-gold); opacity: .6;
+  }
+
+  .brand-big {
+    font-family: var(--serif);
+    font-style: italic; font-weight: 400;
+    font-size: clamp(96px, 16vw, 220px);
+    line-height: .92; letter-spacing: -.012em;
+    color: var(--ink-star);
+    text-shadow: 0 2px 60px rgba(230, 201, 132, .18);
+    display: flex; align-items: flex-start; gap: 30px;
+  }
+  .brand-big .word { position: relative; }
+  .brand-big .word::after {
+    content: "";
+    position: absolute; right: -14px; bottom: 14px;
+    width: 6px; height: 6px;
+    background: var(--accent-gold); border-radius: 50%;
+    box-shadow: 0 0 16px 4px rgba(230, 201, 132, .7);
+    animation:
+      twinkle 2.4s var(--ease) infinite,
+      dot-in .8s var(--ease) 1.6s backwards;
+  }
+  @keyframes dot-in { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: none; } }
+  @keyframes twinkle { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+
+  /* each letter falls in like a star landing */
+  .brand-big .ltr {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(-180px) rotate(-6deg);
+    filter: blur(8px);
+    animation: letter-fall 1.05s cubic-bezier(.22, 1, .36, 1) forwards;
+  }
+  .brand-big .ltr.l1 { animation-delay: .20s; }
+  .brand-big .ltr.l2 { animation-delay: .32s; }
+  .brand-big .ltr.l3 { animation-delay: .44s; }
+  .brand-big .ltr.l4 { animation-delay: .56s; }
+  .brand-big .ltr.l5 { animation-delay: .68s; }
+  .brand-big .ltr.l6 { animation-delay: .80s; }
+  .brand-big .ltr.l7 { animation-delay: .92s; }
+  @keyframes letter-fall {
+    60% { filter: blur(0); }
+    to  { opacity: 1; transform: none; filter: blur(0); }
+  }
+
+  .constellation-mini { margin-top: 18px; width: 130px; height: 170px; flex-shrink: 0; opacity: .7; }
+
+  .brand-sub {
+    margin-top: 30px;
+    font-family: var(--mono);
+    font-size: 13px; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+
+  .ethos {
+    margin-top: 36px;
+    font-family: var(--serif);
+    font-size: clamp(22px, 2.8vw, 30px); line-height: 1.4;
+    color: var(--ink-star); max-width: 24ch;
+  }
+  .ethos :global(em) { font-style: italic; color: var(--accent-gold); }
+
+  .lede {
+    margin-top: 26px;
+    font-size: 15.5px; line-height: 1.78;
+    color: var(--ink-soft); max-width: 54ch;
+  }
+
+  @media (max-width: 760px) {
+    .brand-big { flex-direction: column; gap: 14px; font-size: clamp(72px, 18vw, 140px); }
+    .constellation-mini { width: 90px; height: 120px; }
+  }
+</style>

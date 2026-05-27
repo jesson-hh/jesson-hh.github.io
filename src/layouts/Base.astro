@@ -1,0 +1,523 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description?: string;
+}
+const { lang, title, description = '' } = Astro.props;
+const fontHref =
+  'https://fonts.googleapis.com/css2?' +
+  'family=Instrument+Serif:ital@0;1' +
+  '&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500' +
+  '&family=Hanken+Grotesk:wght@400;500;600;700' +
+  '&family=JetBrains+Mono:wght@400;500;700' +
+  '&family=Noto+Serif+SC:wght@400;500;600;700' +
+  '&family=Noto+Sans+SC:wght@400;500;700' +
+  '&display=swap';
+---
+
+<!doctype html>
+<html lang={lang === 'zh' ? 'zh-Hans' : 'en'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href={fontHref} rel="stylesheet" />
+  </head>
+  <body>
+    <!-- ambient: deep gradient + slow aurora + canvas twinkling stars + nebula + grain -->
+    <div class="ambient" aria-hidden="true">
+      <div class="deep"></div>
+      <div class="aurora"></div>
+      <canvas class="stars-canvas" id="stars-canvas"></canvas>
+      <div class="nebula"></div>
+      <div class="grain"></div>
+    </div>
+
+    <!-- cursor-following spotlight (screen-blend) -->
+    <div class="spotlight" aria-hidden="true"></div>
+
+    <!-- left-edge reading thread — grows with scroll, glows at the tip -->
+    <div class="reading-thread" aria-hidden="true">
+      <div class="fill"></div>
+      <div class="head"></div>
+    </div>
+
+    <Nav lang={lang} />
+    <main>
+      <slot />
+    </main>
+    <Footer lang={lang} />
+
+    <script is:inline>
+      /* =========================================================
+         1. Canvas starfield — true per-star twinkle, cursor wake,
+            click-spawned shooting stars, occasional auto shoot
+         ========================================================= */
+      (function () {
+        var c = document.getElementById('stars-canvas');
+        if (!c) return;
+        var ctx = c.getContext('2d');
+        var DPR = Math.min(window.devicePixelRatio || 1, 2);
+        var W = 0, H = 0;
+        var stars = [], shooting = [];
+        var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        var mx = -9999, my = -9999;
+        window.addEventListener('pointermove', function (e) {
+          mx = e.clientX; my = e.clientY;
+        }, { passive: true });
+        window.addEventListener('pointerleave', function () { mx = -9999; my = -9999; });
+
+        window.addEventListener('click', function (e) {
+          var n = 1 + Math.floor(Math.random() * 2);
+          for (var i = 0; i < n; i++) {
+            var angle = (Math.PI / 5) + Math.random() * (Math.PI * 0.6);
+            var sp = 8 + Math.random() * 5;
+            shooting.push({
+              x: e.clientX, y: e.clientY,
+              vx: Math.cos(angle) * sp,
+              vy: Math.sin(angle) * sp,
+              life: 0,
+              max: 60 + Math.random() * 50,
+              fromClick: true
+            });
+          }
+        });
+
+        function resize() {
+          W = window.innerWidth;
+          H = window.innerHeight;
+          c.width = W * DPR;
+          c.height = H * DPR;
+          c.style.width = W + 'px';
+          c.style.height = H + 'px';
+          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+          build();
+        }
+
+        function build() {
+          stars = [];
+          var n = Math.round((W * H) / 4500);
+          for (var i = 0; i < n; i++) {
+            var depth = Math.random();
+            var bright = Math.random();
+            var hue = bright < 0.12 ? 'gold' : (bright < 0.22 ? 'cool' : 'white');
+            var hero = Math.random() < 0.025;
+            stars.push({
+              x: Math.random() * W,
+              y: Math.random() * H,
+              r: hero ? (1.6 + Math.random() * 1.0) : (0.25 + depth * 1.1),
+              depth: depth,
+              baseA: hero ? 0.85 : (0.30 + depth * 0.55),
+              twinkleSpeed: 0.5 + Math.random() * 2.4,
+              phase: Math.random() * Math.PI * 2,
+              hue: hue,
+              hero: hero,
+              wake: 0
+            });
+          }
+        }
+
+        function colorFor(s, a) {
+          if (s.hue === 'gold') return 'rgba(232,200,130,' + a + ')';
+          if (s.hue === 'cool') return 'rgba(170,200,255,' + a + ')';
+          return 'rgba(246,238,220,' + a + ')';
+        }
+
+        function maybeSpawnShooting() {
+          if (Math.random() < 0.006 && shooting.length < 4) {
+            var angle = (Math.PI / 6) + Math.random() * (Math.PI / 6);
+            var sp = 7 + Math.random() * 5;
+            shooting.push({
+              x: Math.random() * W * 0.7 + W * 0.05,
+              y: Math.random() * H * 0.45 - 30,
+              vx: Math.cos(angle) * sp,
+              vy: Math.sin(angle) * sp,
+              life: 0,
+              max: 70 + Math.random() * 50
+            });
+          }
+        }
+
+        var t0 = performance.now();
+        function frame(now) {
+          var t = (now - t0) / 1000;
+          ctx.clearRect(0, 0, W, H);
+
+          var wakeR = 170;
+          var wakeR2 = wakeR * wakeR;
+          for (var i = 0; i < stars.length; i++) {
+            var s = stars[i];
+            var dx = s.x - mx, dy = s.y - my;
+            var d2 = dx * dx + dy * dy;
+            var target = 0;
+            if (d2 < wakeR2) {
+              target = 1 - Math.sqrt(d2) / wakeR;
+              target = target * target;
+            }
+            var rate = target > s.wake ? 0.20 : 0.035;
+            s.wake += (target - s.wake) * rate;
+
+            var twinkle = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * s.twinkleSpeed + s.phase));
+            var a = s.baseA * twinkle * (1 + s.wake * 1.1);
+            if (a > 1) a = 1;
+            var rR = s.r * (1 + s.wake * 1.7);
+
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, rR, 0, Math.PI * 2);
+            ctx.fillStyle = colorFor(s, a);
+            ctx.fill();
+
+            if (s.hero || rR > 1.05 || s.wake > 0.04) {
+              var glowR = rR * (s.hero ? 6 : 4) * (1 + s.wake * 0.6);
+              var g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
+              g.addColorStop(0, colorFor(s, a * (0.55 + s.wake * 0.35)));
+              g.addColorStop(1, 'rgba(0,0,0,0)');
+              ctx.fillStyle = g;
+              ctx.beginPath();
+              ctx.arc(s.x, s.y, glowR, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // cursor-connecting constellations
+          var awake = [];
+          for (var k = 0; k < stars.length; k++) {
+            if (stars[k].wake > 0.15) awake.push(stars[k]);
+          }
+          if (awake.length > 1) {
+            var maxD = 150;
+            var maxD2 = maxD * maxD;
+            ctx.lineWidth = 0.6;
+            for (var a = 0; a < awake.length; a++) {
+              for (var b = a + 1; b < awake.length; b++) {
+                var A = awake[a], B = awake[b];
+                var ldx = A.x - B.x, ldy = A.y - B.y;
+                var ld2 = ldx * ldx + ldy * ldy;
+                if (ld2 < maxD2) {
+                  var ld = Math.sqrt(ld2);
+                  var la = (1 - ld / maxD) * Math.min(A.wake, B.wake) * 0.55;
+                  ctx.strokeStyle = 'rgba(230,201,132,' + la + ')';
+                  ctx.beginPath();
+                  ctx.moveTo(A.x, A.y);
+                  ctx.lineTo(B.x, B.y);
+                  ctx.stroke();
+                }
+              }
+            }
+          }
+
+          // shooting stars
+          if (!reduced) maybeSpawnShooting();
+          for (var j = shooting.length - 1; j >= 0; j--) {
+            var sh = shooting[j];
+            sh.x += sh.vx; sh.y += sh.vy; sh.life++;
+            if (sh.life > sh.max || sh.x > W + 60 || sh.y > H + 60) {
+              shooting.splice(j, 1); continue;
+            }
+            var kk = Math.sin(Math.PI * sh.life / sh.max);
+            var tailX = sh.x - sh.vx * 9;
+            var tailY = sh.y - sh.vy * 9;
+            var grad = ctx.createLinearGradient(sh.x, sh.y, tailX, tailY);
+            grad.addColorStop(0, 'rgba(255,240,205,' + (kk * 0.95) + ')');
+            grad.addColorStop(0.6, 'rgba(230,201,132,' + (kk * 0.35) + ')');
+            grad.addColorStop(1, 'rgba(230,201,132,0)');
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 1.4;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(sh.x, sh.y);
+            ctx.lineTo(tailX, tailY);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(255,245,220,' + (kk * 0.9) + ')';
+            ctx.beginPath();
+            ctx.arc(sh.x, sh.y, 1.6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          requestAnimationFrame(frame);
+        }
+
+        window.addEventListener('resize', function () {
+          clearTimeout(window.__rs);
+          window.__rs = setTimeout(resize, 120);
+        });
+        resize();
+        requestAnimationFrame(frame);
+      })();
+
+      /* =========================================================
+         2. Mouse spotlight — lerp toward cursor, screen-blend glow
+         ========================================================= */
+      (function () {
+        var sp = document.querySelector('.spotlight');
+        if (!sp) return;
+        if (matchMedia('(hover: none)').matches) return;
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          sp.style.opacity = '0';
+          return;
+        }
+        var tx = window.innerWidth / 2;
+        var ty = window.innerHeight / 2;
+        var x = tx, y = ty;
+        var visible = false;
+
+        window.addEventListener('pointermove', function (e) {
+          tx = e.clientX; ty = e.clientY;
+          if (!visible) { visible = true; sp.classList.add('on'); }
+        }, { passive: true });
+
+        window.addEventListener('pointerout', function (e) {
+          if (!e.relatedTarget && !e.toElement) {
+            sp.classList.remove('on'); visible = false;
+          }
+        });
+        document.addEventListener('mouseleave', function () {
+          sp.classList.remove('on'); visible = false;
+        });
+
+        function tick() {
+          x += (tx - x) * 0.14;
+          y += (ty - y) * 0.14;
+          sp.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      })();
+
+      /* =========================================================
+         3. Scroll reveal — toggles .in-view as elements enter/leave
+         ========================================================= */
+      (function () {
+        var nodes = document.querySelectorAll('.reveal');
+        if (!('IntersectionObserver' in window)) {
+          nodes.forEach(function (el) { el.classList.add('in-view'); });
+          return;
+        }
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add('in-view');
+            } else if (e.intersectionRatio === 0) {
+              e.target.classList.remove('in-view');
+            }
+          });
+        }, { threshold: [0, 0.15], rootMargin: '0px 0px -60px 0px' });
+        nodes.forEach(function (el) { io.observe(el); });
+      })();
+
+      /* =========================================================
+         4. Section belts — inject three-diamond belt onto each .rule
+         ========================================================= */
+      (function () {
+        var rules = document.querySelectorAll('.rule');
+        rules.forEach(function (r) {
+          if (r.querySelector('.belt')) return;
+          var belt = document.createElement('span');
+          belt.className = 'belt';
+          belt.setAttribute('aria-hidden', 'true');
+          belt.innerHTML = '<i></i><i></i><i></i>';
+          r.appendChild(belt);
+        });
+      })();
+
+      /* =========================================================
+         5. Reading thread — left-edge progress with glowing head
+         ========================================================= */
+      (function () {
+        var thread = document.querySelector('.reading-thread');
+        if (!thread) return;
+        var fill = thread.querySelector('.fill');
+        var head = thread.querySelector('.head');
+        var ticking = false;
+
+        function update() {
+          ticking = false;
+          var doc = document.documentElement;
+          var max = Math.max(1, doc.scrollHeight - window.innerHeight);
+          var p = Math.min(1, Math.max(0, window.scrollY / max));
+          var h = p * window.innerHeight;
+          fill.style.height = (p * 100) + '%';
+          head.style.transform = 'translateY(' + h + 'px)';
+        }
+        update();
+        window.addEventListener('scroll', function () {
+          if (!ticking) { requestAnimationFrame(update); ticking = true; }
+        }, { passive: true });
+        window.addEventListener('resize', update);
+      })();
+
+      /* =========================================================
+         6. Hero parallax — content drifts down slowly on scroll
+         ========================================================= */
+      (function () {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var heroContent = document.querySelector('.hero-content');
+        var heroBg = document.querySelector('.hero-bg');
+        var aurora = document.querySelector('.ambient .aurora');
+        if (!heroContent && !heroBg && !aurora) return;
+        var target = 0, current = 0;
+        window.addEventListener('scroll', function () {
+          target = window.scrollY;
+        }, { passive: true });
+        (function loop() {
+          current += (target - current) * 0.12;
+          if (current < window.innerHeight) {
+            if (heroContent) heroContent.style.transform = 'translate3d(0,' + (current * 0.22) + 'px,0)';
+            if (heroBg) heroBg.style.transform = 'translate3d(0,' + (current * 0.12) + 'px,0) scale(1.02)';
+          }
+          if (aurora) aurora.style.translate = '0 ' + (current * -0.04) + 'px';
+          requestAnimationFrame(loop);
+        })();
+      })();
+
+      /* =========================================================
+         7. Constellation SVG — draw in lines, then fade stars
+         ========================================================= */
+      (function () {
+        var svg = document.querySelector('.constellation-mini');
+        if (!svg) return;
+        var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var lines = svg.querySelectorAll('line');
+        var circles = svg.querySelectorAll('circle');
+        var texts = svg.querySelectorAll('text');
+        if (reduced) return;
+
+        lines.forEach(function (l, i) {
+          var len = l.getTotalLength();
+          l.style.strokeDasharray = len + ' ' + len;
+          l.style.strokeDashoffset = len;
+          l.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1)';
+          l.style.transitionDelay = (1.0 + i * 0.10) + 's';
+        });
+        circles.forEach(function (c, i) {
+          c.style.opacity = '0';
+          c.style.transformBox = 'fill-box';
+          c.style.transformOrigin = 'center';
+          c.style.transform = 'scale(.4)';
+          c.style.transition = 'opacity .7s ease, transform .7s cubic-bezier(.22,1,.36,1)';
+          c.style.transitionDelay = (0.85 + i * 0.07) + 's';
+        });
+        texts.forEach(function (t, i) {
+          t.style.opacity = '0';
+          t.style.transition = 'opacity .6s ease';
+          t.style.transitionDelay = (2.2 + i * 0.10) + 's';
+        });
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            lines.forEach(function (l) { l.style.strokeDashoffset = '0'; });
+            circles.forEach(function (c) {
+              c.style.opacity = '1';
+              c.style.transform = 'scale(1)';
+            });
+            texts.forEach(function (t) { t.style.opacity = '1'; });
+          });
+        });
+      })();
+    </script>
+
+    <style is:global>
+      /* ============ AMBIENT LAYER (fixed, behind everything) ============ */
+      .ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+      .ambient .deep {
+        position: absolute; inset: 0;
+        background:
+          radial-gradient(120% 80% at 50% 110%, rgba(36, 22, 68, .55), transparent 60%),
+          radial-gradient(90% 70% at 50% -10%, rgba(20, 30, 90, .45), transparent 65%),
+          linear-gradient(180deg, #04061a 0%, #070924 45%, #0a0a26 100%);
+      }
+      .ambient .aurora {
+        position: absolute; inset: -15%;
+        background:
+          radial-gradient(46% 38% at 22% 18%, rgba(132, 84, 206, .22), transparent 62%),
+          radial-gradient(50% 44% at 78% 72%, rgba(70, 120, 210, .20), transparent 62%),
+          radial-gradient(34% 30% at 86% 22%, rgba(230, 140, 180, .14), transparent 62%),
+          radial-gradient(40% 36% at 14% 82%, rgba(90, 180, 200, .16), transparent 62%),
+          radial-gradient(28% 26% at 50% 50%, rgba(230, 201, 132, .07), transparent 70%);
+        filter: blur(48px); opacity: .85;
+        animation: aurora-shift 32s ease-in-out infinite alternate;
+        will-change: transform;
+      }
+      @keyframes aurora-shift {
+        0%   { transform: translate3d(0, 0, 0) scale(1); }
+        50%  { transform: translate3d(-2%, -2%, 0) scale(1.06); }
+        100% { transform: translate3d( 2%, -1%, 0) scale(1.08); }
+      }
+      .ambient .stars-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      .ambient .nebula {
+        position: absolute; inset: 0;
+        background:
+          radial-gradient(55% 45% at 82% 6%, rgba(140, 80, 200, .22), transparent 60%),
+          radial-gradient(50% 50% at 6% 82%, rgba(60, 100, 200, .20), transparent 60%),
+          radial-gradient(36% 34% at 50% 50%, rgba(5, 8, 22, 0), rgba(3, 5, 18, .7) 75%);
+        mix-blend-mode: soft-light; opacity: .95;
+      }
+      .ambient .grain {
+        position: absolute; inset: 0; opacity: .32; mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+      }
+
+      /* ============ MOUSE SPOTLIGHT ============ */
+      .spotlight {
+        position: fixed; left: 0; top: 0;
+        width: 560px; height: 560px;
+        margin: -280px 0 0 -280px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 3;
+        background: radial-gradient(circle at 50% 50%,
+          rgba(255, 232, 180, .07) 0%,
+          rgba(230, 201, 132, .05) 22%,
+          rgba(156, 180, 255, .035) 44%,
+          rgba(180, 140, 220, .015) 62%,
+          transparent 75%);
+        mix-blend-mode: screen;
+        filter: blur(10px);
+        opacity: 0;
+        transition: opacity 1s ease;
+        will-change: transform, opacity;
+      }
+      .spotlight.on { opacity: 1; }
+      @media (hover: none) { .spotlight { display: none; } }
+
+      /* ============ READING THREAD (left edge progress) ============ */
+      .reading-thread {
+        position: fixed; left: 22px; top: 0; bottom: 0; width: 1px;
+        z-index: 4; pointer-events: none;
+        background: linear-gradient(180deg,
+          rgba(216, 180, 106, 0),
+          rgba(216, 180, 106, .06) 30%,
+          rgba(216, 180, 106, .06) 70%,
+          rgba(216, 180, 106, 0));
+      }
+      .reading-thread .fill {
+        position: absolute; left: 0; top: 0; width: 100%; height: 0%;
+        background: linear-gradient(180deg, rgba(230, 201, 132, 0), rgba(230, 201, 132, .55));
+        transition: height .08s linear;
+      }
+      .reading-thread .head {
+        position: absolute; left: -3px; top: 0;
+        width: 7px; height: 7px; border-radius: 50%;
+        background: rgba(255, 236, 200, .95);
+        box-shadow:
+          0 0 14px 3px rgba(230, 201, 132, .65),
+          0 0 32px 8px rgba(230, 201, 132, .20);
+        transform: translateY(0);
+        transition: transform .08s linear;
+      }
+      @media (max-width: 760px) { .reading-thread { display: none; } }
+    </style>
+  </body>
+</html>

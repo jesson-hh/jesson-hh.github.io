@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import WorkList from '../../components/WorkList.astro';
+import About from '../../components/About.astro';
+import WritingList from '../../components/WritingList.astro';
+import { getSite } from '../../data/content';
+
+const lang = 'en' as const;
+const site = getSite(lang);
+const title = `${site.name} · ${site.role}`;
+---
+
+<Base lang={lang} title={title} description={site.hero.lede}>
+  <Hero lang={lang} />
+  <WorkList lang={lang} />
+  <About lang={lang} />
+  <WritingList lang={lang} />
+</Base>

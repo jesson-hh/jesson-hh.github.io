@@ -1,0 +1,180 @@
+---
+import type { Lang } from '../i18n/ui';
+import { useTranslations, localizePath } from '../i18n/ui';
+import type { Project } from '../data/content';
+
+interface Props { lang: Lang; project: Project; next: Project }
+const { lang, project, next } = Astro.props;
+const t = useTranslations(lang);
+const meta = [
+  { lab: t('meta.role'), val: project.role },
+  { lab: t('meta.stack'), val: project.stack },
+  { lab: t('meta.context'), val: project.context },
+  { lab: t('meta.year'), val: project.year },
+];
+---
+
+<article class="pd">
+  <div class="wrap">
+    <a class="back mono reveal" href={`${localizePath('/', lang)}#work`}>← {t('work.back')}</a>
+    <p class="cat mono reveal">{project.category} · {project.year}</p>
+    <h1 class="serif reveal">{project.title}</h1>
+    <div class="meta reveal">
+      {meta.map((m) => (
+        <div>
+          <div class="lab mono">{m.lab}</div>
+          <div class="val">{m.val}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div
+      class="cover reveal from-scale"
+      role="img"
+      aria-label="cover"
+      style={`background-image:url('${project.thumb}')`}
+    ></div>
+  </div>
+
+  <div class="wrap body">
+    <div class="prose">
+      <p class="summary serif">{project.summary}</p>
+      {project.sections.map((s) => (
+        <section>
+          <h2 class="serif">{s.heading}</h2>
+          <p>{s.body}</p>
+        </section>
+      ))}
+    </div>
+
+    {project.links.length > 0 ? (
+      <aside class="side">
+        <div class="lab mono">{t('project.links')}</div>
+        {project.links.map((l) => <a href={l.href}>{l.label}</a>)}
+      </aside>
+    ) : null}
+  </div>
+
+  <div class="wrap">
+    <a class="next" href={localizePath(`/projects/${next.slug}`, lang)}>
+      <span class="lab mono">{t('project.next')} →</span>
+      <span class="title serif">{next.title}</span>
+    </a>
+  </div>
+</article>
+
+<style>
+  .pd { padding-top: clamp(80px, 9vw, 110px); }
+
+  .back { font-size: 13px; color: var(--muted); }
+  .back:hover { color: var(--accent-gold); }
+  .cat {
+    margin-top: 28px;
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent-gold);
+  }
+  h1 {
+    margin-top: 14px;
+    font-family: var(--serif);
+    font-weight: 400; font-style: italic;
+    font-size: clamp(34px, 5.5vw, 60px); line-height: 1.06; letter-spacing: -.012em;
+    max-width: 22ch; color: var(--ink-star);
+  }
+
+  .meta { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 34px; }
+  .meta .lab {
+    font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .meta .val { font-size: 15px; margin-top: 5px; color: var(--ink-star); }
+
+  .cover {
+    height: clamp(220px, 38vw, 360px);
+    border-radius: 16px;
+    margin: clamp(28px, 4vw, 40px) 0 8px;
+    position: relative;
+    background-size: cover; background-position: center;
+    box-shadow:
+      0 24px 60px -28px rgba(0, 0, 0, .7),
+      inset 0 0 0 1px var(--glass-line);
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: clamp(32px, 5vw, 56px);
+    padding-block: clamp(40px, 6vw, 60px);
+    align-items: start;
+  }
+  .body:has(.prose:only-child) { grid-template-columns: 1fr; }
+
+  .summary {
+    font-family: var(--serif);
+    font-size: clamp(20px, 2.4vw, 24px);
+    line-height: 1.5;
+    font-weight: 400; font-style: italic;
+    color: var(--ink-star);
+    margin-bottom: 12px;
+  }
+
+  .prose section { margin-top: 30px; }
+  .prose h2 {
+    font-family: var(--serif);
+    font-size: 24px; font-weight: 400;
+    margin: 0 0 12px;
+    color: var(--accent-gold);
+  }
+  .prose p {
+    font-size: 16.5px; line-height: 1.8;
+    color: var(--ink-soft);
+  }
+
+  .side {
+    position: sticky; top: 96px;
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    border-radius: 14px;
+    padding: 22px 24px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .side .lab {
+    font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent-gold);
+    margin-bottom: 12px;
+  }
+  .side a {
+    display: block;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--glass-line);
+    font-size: 14px;
+    color: var(--ink-soft);
+    transition: color .18s var(--ease);
+  }
+  .side a:last-child { border-bottom: none; }
+  .side a::after { content: " ↗"; color: var(--accent-gold); }
+  .side a:hover { color: var(--accent-gold); }
+
+  .next {
+    display: block;
+    border-top: 1px solid var(--glass-line);
+    padding: 30px 0 8px;
+    margin-top: 30px;
+  }
+  .next .lab { font-size: 12px; color: var(--muted); }
+  .next .title {
+    display: block; margin-top: 8px;
+    font-family: var(--serif);
+    font-size: clamp(22px, 3vw, 30px); font-weight: 400;
+    color: var(--ink-star);
+    transition: color .18s var(--ease);
+  }
+  .next:hover .title { color: var(--accent-gold); }
+
+  @media (max-width: 760px) {
+    .body { grid-template-columns: 1fr; }
+    .side { position: static; }
+  }
+</style>

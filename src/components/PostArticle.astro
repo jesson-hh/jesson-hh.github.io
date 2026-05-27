@@ -1,0 +1,57 @@
+---
+import type { Lang } from '../i18n/ui';
+import { useTranslations, localizePath } from '../i18n/ui';
+import type { Post } from '../data/content';
+
+interface Props { lang: Lang; post: Post }
+const { lang, post } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<article class="post">
+  <div class="col">
+    <a class="back mono reveal" href={localizePath('/writing', lang)}>← {t('writing.back')}</a>
+    <p class="meta mono reveal">{post.date} · {post.tag} · {post.reading} {t('reading')}</p>
+    <h1 class="serif reveal">{post.title}</h1>
+    <p class="lede serif reveal">{post.summary}</p>
+    <div class="prose reveal">
+      {post.body.map((p) => <p>{p}</p>)}
+    </div>
+  </div>
+</article>
+
+<style>
+  .post { padding-top: clamp(80px, 9vw, 110px); }
+  .col {
+    max-width: 720px; margin: 0 auto;
+    padding-inline: var(--pad);
+  }
+  .back { font-size: 13px; color: var(--muted); }
+  .back:hover { color: var(--accent-gold); }
+  .meta {
+    margin-top: 30px;
+    font-size: 12px; letter-spacing: .12em;
+    color: var(--muted);
+  }
+  h1 {
+    margin-top: 14px;
+    font-family: var(--serif);
+    font-weight: 400; font-style: italic;
+    font-size: clamp(32px, 5.2vw, 56px); line-height: 1.08; letter-spacing: -.012em;
+    color: var(--ink-star);
+  }
+  .lede {
+    margin-top: 22px;
+    font-family: var(--serif);
+    font-size: clamp(18px, 2.1vw, 22px); line-height: 1.5;
+    color: var(--ink-soft);
+    font-weight: 400; font-style: italic;
+  }
+  .prose {
+    margin-top: 36px;
+    border-top: 1px solid var(--glass-line);
+    padding-top: 30px;
+  }
+  .prose p { font-size: 17px; line-height: 1.85; color: var(--ink-soft); }
+  .prose p + p { margin-top: 18px; }
+</style>

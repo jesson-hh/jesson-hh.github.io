@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro';
+import WritingIndex from '../../components/WritingIndex.astro';
+import { getSite } from '../../data/content';
+import { useTranslations } from '../../i18n/ui';
+
+const lang = 'zh' as const;
+const site = getSite(lang);
+const t = useTranslations(lang);
+---
+
+<Base lang={lang} title={`${t('sec.writing')} · ${site.name}`}>
+  <WritingIndex lang={lang} />
+</Base>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" width="320" height="220">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="48%" r="78%">
+      <stop offset="0%" stop-color="#0c0e2e"/>
+      <stop offset="60%" stop-color="#05071a"/>
+      <stop offset="100%" stop-color="#02030d"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3a64c7" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#3a64c7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="warm" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e8c688" stop-opacity=".45"/>
+      <stop offset="100%" stop-color="#e8c688" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  <ellipse cx="100" cy="120" rx="160" ry="100" fill="url(#glow)"/>
+  <ellipse cx="240" cy="80" rx="120" ry="80" fill="url(#warm)"/>
+  <!-- shock-wave style PDE curves: a sharp gradient front propagating right -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M0,150 C 50,150 90,150 120,148 C 140,146 150,80 170,72 C 200,68 230,140 280,140 C 305,140 320,140 320,140" stroke="rgba(180,205,255,.55)" stroke-width="1.4"/>
+    <path d="M0,160 C 55,160 100,160 130,158 C 152,155 162,90 184,84 C 215,80 245,150 290,150 C 308,150 320,150 320,150" stroke="rgba(230,201,132,.85)" stroke-width="1.6"/>
+    <path d="M0,170 C 60,170 110,170 140,168 C 165,165 175,100 200,96 C 230,92 260,160 300,160 C 312,160 320,160 320,160" stroke="rgba(246,238,220,.4)" stroke-width="1.2"/>
+  </g>
+  <!-- shock-front marker (gold) -->
+  <circle cx="184" cy="84" r="2.4" fill="#e8c688"/>
+  <circle cx="184" cy="84" r="6" fill="none" stroke="rgba(230,201,132,.5)" stroke-width=".7"/>
+  <!-- stars -->
+  <g fill="#fff">
+    <circle cx="40" cy="32" r=".9" opacity=".8"/>
+    <circle cx="78" cy="60" r=".4" opacity=".5"/>
+    <circle cx="130" cy="20" r=".7" opacity=".75"/>
+    <circle cx="200" cy="40" r=".5" opacity=".6"/>
+    <circle cx="280" cy="28" r="1" opacity=".9"/>
+    <circle cx="56" cy="190" r=".5" opacity=".5"/>
+    <circle cx="120" cy="200" r=".8" opacity=".7"/>
+    <circle cx="260" cy="180" r=".4" opacity=".5"/>
+    <circle cx="300" cy="200" r=".7" opacity=".8"/>
+    <circle cx="20" cy="100" r=".4" opacity=".4"/>
+    <circle cx="220" cy="210" r=".6" opacity=".7"/>
+    <circle cx="160" cy="50" r=".4" opacity=".55"/>
+  </g>
+</svg>
