@@ -852,13 +852,13 @@ const site: Record<Lang, Site> = {
       offers: [],
     },
     about: {
-      title: '研究者、独立开发者,偶尔写点东西。',
+      title: '白天做研究,夜里拍星空。',
       bio: [
-        '[ 以下是我根据你的公开信息起草的,请你改成自己的话。] 我在武汉,做 AI 研究,方向偏向扩散模型 / 生成模型的理论一面——收敛、误差界、引导这些。',
-        '研究之外,我喜欢把方法做成能用的东西:对话式的 arXiv 论文蒸馏 agent、A 股多智能体研报系统……对我来说,工具好不好用,是检验自己有没有真的理解的另一种方式。',
+        '白天我做 AI 研究——扩散与生成模型的理论那一面。但这一页,想说点别的。',
+        '我喜欢深空摄影,也拍胶片。把镜头对准几百万光年外的星云,接住那些走了很久才抵达的光。一个做生成模型的人,业余却在收集最真实的光子,大概不是巧合——在这个越来越虚假的时代,想亲手留下一点真实的东西。',
       ],
       location: '武汉大学 · UTC+8',
-      facts: ['扩散 / 生成模型理论', 'LLM 多智能体', 'MCP', 'Python · PyTorch', 'RAG · FTS5', '开源'],
+      facts: ['扩散 / 生成模型理论', 'LLM 多智能体', 'MCP', '深空摄影', '胶片', '开源'],
     },
     contact: {
       ctaHtml: '想聊聊天,或者只是打个招呼?',
@@ -891,13 +891,13 @@ const site: Record<Lang, Site> = {
       offers: [],
     },
     about: {
-      title: 'Researcher, independent developer, occasional writer.',
+      title: 'Researcher by day, chasing starlight by night.',
       bio: [
-        '[ Drafted from your public signals — please rewrite in your own words. ] I am based in Wuhan, doing AI research that leans toward the theory side of diffusion / generative models — convergence, error bounds, guidance.',
-        'Beyond research I like turning methods into things people can use: a conversational arXiv distillation agent, a multi-agent equity workstation. For me, whether a tool is actually usable is another test of whether I truly understood the idea.',
+        'By day I do AI research — the theory side of diffusion and generative models. But this page is for something else.',
+        'I love deep-space astrophotography, and I shoot film. Pointing a lens at a nebula millions of light-years away, catching light that has travelled longer than I can picture. Someone who builds generative models, spending his free time collecting the most real photons there are — probably not a coincidence. In an age that feels more and more synthetic, I want to leave behind something real, made by hand.',
       ],
       location: 'Wuhan University · UTC+8',
-      facts: ['Diffusion / generative theory', 'LLM multi-agent', 'MCP', 'Python · PyTorch', 'RAG · FTS5', 'Open source'],
+      facts: ['Diffusion / generative theory', 'LLM multi-agent', 'MCP', 'Astrophotography', 'Film', 'Open source'],
     },
     contact: {
       ctaHtml: 'Want to chat, or just say hi?',
