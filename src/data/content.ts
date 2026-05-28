@@ -852,10 +852,11 @@ const site: Record<Lang, Site> = {
       offers: [],
     },
     about: {
-      title: '白天做研究,夜里拍星空。',
+      title: '白天做研究,夜里拍星空',
       bio: [
-        '白天我做 AI 研究——扩散与生成模型的理论那一面。但这一页,想说点别的。',
-        '我喜欢深空摄影,也拍胶片。把镜头对准几百万光年外的星云,接住那些走了很久才抵达的光。一个做生成模型的人,业余却在收集最真实的光子,大概不是巧合——在这个越来越虚假的时代,想亲手留下一点真实的东西。',
+        '喜欢深空摄影,也拍胶片。',
+        '把镜头对准几百万光年外的星云,接住那些走了很久才抵达的光。',
+        '在这个越来越虚假的时代,想亲手留下一点真实的东西。',
       ],
       location: '武汉大学 · UTC+8',
       facts: ['扩散 / 生成模型理论', 'LLM 多智能体', 'MCP', '深空摄影', '胶片', '开源'],
@@ -891,10 +892,11 @@ const site: Record<Lang, Site> = {
       offers: [],
     },
     about: {
-      title: 'Researcher by day, chasing starlight by night.',
+      title: 'Researcher by day, chasing starlight by night',
       bio: [
-        'By day I do AI research — the theory side of diffusion and generative models. But this page is for something else.',
-        'I love deep-space astrophotography, and I shoot film. Pointing a lens at a nebula millions of light-years away, catching light that has travelled longer than I can picture. Someone who builds generative models, spending his free time collecting the most real photons there are — probably not a coincidence. In an age that feels more and more synthetic, I want to leave behind something real, made by hand.',
+        'I love deep-space astrophotography, and I shoot film.',
+        'Pointing a lens at a nebula millions of light-years away, catching light that has travelled far longer than I can picture.',
+        'In an age that feels more and more synthetic, I want to leave behind something real, made by hand.',
       ],
       location: 'Wuhan University · UTC+8',
       facts: ['Diffusion / generative theory', 'LLM multi-agent', 'MCP', 'Astrophotography', 'Film', 'Open source'],

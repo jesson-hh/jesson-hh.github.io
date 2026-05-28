@@ -26,10 +26,10 @@ const site = getSite(lang);
         onerror="this.classList.add('broken');this.removeAttribute('src');"
       />
       <div class="reveal from-right">
-        <h2 class="serif">{site.about.title}</h2>
-        <div class="bio">
-          {site.about.bio.map((p) => <p>{p}</p>)}
-        </div>
+        <h2 class:list={['serif', { 'one-line': lang === 'zh' }]}>{site.about.title}</h2>
+        <ul class="bio">
+          {site.about.bio.map((p) => <li>{p}</li>)}
+        </ul>
         <ul class="chips">
           {site.about.facts.map((f) => <li>{f}</li>)}
         </ul>
@@ -65,11 +65,25 @@ const site = getSite(lang);
   h2 {
     font-family: var(--serif); font-weight: 400;
     font-size: clamp(26px, 3.2vw, 36px); line-height: 1.18;
-    color: var(--ink-star); max-width: 22ch;
+    color: var(--ink-star);
   }
-  .bio { margin-top: 22px; }
-  .bio p { font-size: 16px; line-height: 1.78; color: var(--ink-soft); max-width: 58ch; }
-  .bio p + p { margin-top: 14px; }
+  /* zh title is short — keep it on a single line; en title is long and may wrap */
+  h2.one-line { white-space: nowrap; }
+  .bio { margin-top: 26px; list-style: none; padding: 0; max-width: 60ch; }
+  .bio li {
+    position: relative;
+    padding: 16px 0 16px 30px;
+    font-size: 17px; line-height: 1.6;
+    color: var(--ink-star);
+    border-bottom: 1px solid var(--glass-line);
+  }
+  .bio li:last-child { border-bottom: none; }
+  .bio li::before {
+    content: "✦";
+    position: absolute; left: 0; top: 18px;
+    color: var(--accent-gold);
+    font-size: 13px; line-height: 1;
+  }
 
   .chips { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 9px; }
   .chips li {
