@@ -36,4 +36,4 @@ public/
 
 ## 项目
 
-7 个项目陈列在主页 Work 区,点击进入详情页:Agent 组网(进行中)/ PDE 神经算子 / 觀瀾 / OSS-Scout / 记忆共享 / Paper Distiller / Jarvis。
+6 个项目陈列在主页 Work 区,点击进入详情页:Agent 组网(进行中)/ 觀瀾 / OSS-Scout / 记忆共享 / Paper Distiller / Jarvis。

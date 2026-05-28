@@ -73,76 +73,6 @@ const projects: Record<Lang, Project[]> = {
     },
     /* 2 ----------------------------------------------------------------- */
     {
-      slug: 'pde-neural-operator',
-      category: 'AI for Science · 神经算子',
-      title: 'PDE 神经算子代理模型(AI4S 竞赛)',
-      summary: 'AI4S 偏微分方程竞赛代理模型——从 PDEBench 预训练权重微调,1D Burgers 在 task1 / task2 上分别拿到 91.66 / 88.93(Lorentzian 评分,满分 100)。训练循环本身做成多阶段自主 agent,LLM 决定下一步该改超参、换家族、还是从某个历史 trial 继续。',
-      year: '2026',
-      role: '设计 · 实验 · 自主 agent 调度',
-      stack: 'PyTorch · FNO · PDEBench · LLM Orchestrator',
-      context: 'AI4S 竞赛 · 已完赛',
-      thumb: '/stars/thumbs/neural-operator.svg',
-      highlights: [
-        { label: 'task1 best', value: '91.66' },
-        { label: 'task2 best', value: '88.93' },
-        { label: '评分体系', value: 'Lorentzian · /100' },
-        { label: 'autonomous trials', value: 'v1 — v20' },
-      ],
-      links: [],
-      sections: [
-        {
-          heading: '背景',
-          body: 'AI4S 偏微分方程竞赛要求在限定算力和数据下,训练一个能在 1D Burgers 方程上低误差预测的神经算子。直接训练或粗暴微调都不够:既要解决冷启动,又要在多轮反思 / 重启中持续提升,而每一轮训练加评估的代价并不便宜——人盯着调超参,成本太高。这个项目把训练循环本身交给了一个 agent,让 LLM 来决定下一步去哪儿。',
-        },
-        {
-          heading: '方法',
-          body: '从 PDEBench 公开预训练权重出发做迁移微调,把训练循环做成一个 LLM 调度的多阶段 agent——每一轮按下面 5 个阶段串起来,每个阶段都留下结构化产物,既给 agent 自己回顾,也是事后人工溯源的证据。',
-          bullets: [
-            'SCAFFOLD —— LLM 起草本轮的设计方向、家族选择、超参建议',
-            'TRAIN —— 调度 PyTorch 训练,长 tier 留 30 — 50 epoch 收敛空间',
-            'EVAL —— 多 split 评分,产出 JSON 证据包',
-            'REFLECT —— LLM 读评分 + 训练日志,自己写复盘',
-            'DECIDE —— 继续、回退,或从某个历史 trial 链式继续(continue_from_trial)',
-          ],
-        },
-        {
-          heading: '架构',
-          body: '一次跑动辄半天,中间任何一次 LLM 调用超时,这个昂贵的循环就被打断了。所以工程上花了相当多力气在「让长跑别死」上,做了一层稳定面把外部抖动吃掉。',
-          bullets: [
-            'LLM proxy:5xx / timeout / connection / 429 统一 6 次重试,5s 基础指数退避,总容忍窗口 315s',
-            '路径规范:PROJECT_ROOT 绝对路径锁死,subprocess 全部走绝对路径,proxy 日志目录固定',
-            'Trial 链式继续:任何历史 trial 都能作为下一轮起点,agent 自己挑',
-            '家族对比:同时跑两条线——简单 FNO + pushforward,以及 ν-FiLM + estimator',
-          ],
-        },
-        {
-          heading: '关键决策',
-          body: '后半程最重要的不是迭代,是知道什么时候停。',
-          bullets: [
-            'task2 简单 FNO + pushforward 拿到 88.93 后,后续四轮换家族尝试全部败下阵——接受冠军,停手',
-            '把 scaffold 文档里加一张「家族战绩表」,让 agent 看见之前哪些方向已经失败,而不是每次从零选',
-            '当一次跑被外部服务 502 打断后,补的重试层让后续多个 trial 在同样的瞬时故障下平稳跑完——证明这一层加得对',
-            '相对分数会骗人:Lorentzian 评分一开始按方向理解错过几次,后来明确「总分越高越好,verdict 阈值绝对」',
-          ],
-        },
-        {
-          heading: '复盘',
-          body: '这个项目最值得说的不是分数,是给 agent 写规则的方式。',
-          bullets: [
-            '不要给 agent 写「看见 X 就做 Y」的方法学——只给它机制,让它自己找节奏',
-            '人的直觉容易过拟合到本轮,agent 在多轮里平均下来反而更稳',
-            '简单家族常常赢复杂家族,前提是给足 epoch 预算',
-            'agent 调度有效的前提,是把基础设施做扎实——proxy、路径、证据三件事先稳住',
-          ],
-        },
-        {
-          heading: '现状',
-          body: 'task1 最优 91.66,task2 最优 88.93,两个任务的提交码都过审、打包归档(submission/code/{task1,task2}/),evidence trail 完整能溯源到每一次 LLM 工具调用。这一项目前以 phase-9-exploration / phase-10 分支封存。',
-        },
-      ],
-    },
-    /* 3 ----------------------------------------------------------------- */
-    {
       slug: 'financial-analyst',
       category: 'LLM Agents · 多智能体',
       title: '觀瀾 · A 股多智能体研报工作站',
@@ -164,7 +94,7 @@ const projects: Record<Lang, Project[]> = {
         { heading: '现状', body: '已发到 PyPI 稳定版(v1.0.6),712 测试;`fa start` 零配置一行启动(向导 + 后端 + Web UI + 浏览器自动打开);31 个 buddy 工具、5 个 swarm 预设。支持 4 家 LLM(qwen / deepseek / openai / anthropic)热切换,Aliyun Bailian 1M 免费 token 大约够 150 份报告。数据集托管在 HuggingFace(demo 155MB / lite 3GB / full 14GB),CN 用户走 hf-mirror 或 ModelScope 加速 3-10 倍。' },
       ],
     },
-    /* 4 ----------------------------------------------------------------- */
+    /* 3 ----------------------------------------------------------------- */
     {
       slug: 'oss-scout',
       category: 'MCP · 工具',
@@ -184,7 +114,7 @@ const projects: Record<Lang, Project[]> = {
         { heading: '现状', body: 'v0.4 已在 Claude Code user scope 上线,8 个工具实跑。打分器目前是启发式,等本地 Ollama 升级后挂模型分;Profile 持久化在 SQLite,反馈即时生效。' },
       ],
     },
-    /* 5 ----------------------------------------------------------------- */
+    /* 4 ----------------------------------------------------------------- */
     {
       slug: 'project-experience-mcp',
       category: 'MCP · Agent 基础设施',
@@ -202,7 +132,7 @@ const projects: Record<Lang, Project[]> = {
         { heading: '现状', body: '已在多个真实项目上完成挖掘 + 卡片沉淀:financial-analyst、weekly-agentmemory、memory-share、personalized-repo-mcp、paper-distiller、pde-phase8/10、ceramic-ai-predict 等。卡片支持搜索/归档,候选支持 new / carded / rejected 状态流转。' },
       ],
     },
-    /* 6 ----------------------------------------------------------------- */
+    /* 5 ----------------------------------------------------------------- */
     {
       slug: 'paper-distiller',
       category: 'LLM Agents · 研究工具',
@@ -223,7 +153,7 @@ const projects: Record<Lang, Project[]> = {
         { heading: '现状', body: '已发布到 PyPI(MIT),436 测试;支持多家 LLM provider;成本可控——深度蒸馏约 ¥0.04 / 篇。' },
       ],
     },
-    /* 7 ----------------------------------------------------------------- */
+    /* 6 ----------------------------------------------------------------- */
     {
       slug: 'jarvis',
       category: '个人 Agent',
@@ -265,76 +195,6 @@ const projects: Record<Lang, Project[]> = {
     },
     /* 2 ----------------------------------------------------------------- */
     {
-      slug: 'pde-neural-operator',
-      category: 'AI for Science · Neural operators',
-      title: 'Neural Operator Surrogate for PDEs (AI4S Competition)',
-      summary: 'A neural-operator surrogate for the AI4S PDE competition — fine-tuned from PDEBench checkpoints, with the training loop itself driven by a multi-phase autonomous agent. Scored 91.66 / 88.93 on 1D Burgers task1 / task2 (Lorentzian score, max 100).',
-      year: '2026',
-      role: 'Design · Experiments · Autonomous agent orchestration',
-      stack: 'PyTorch · FNO · PDEBench · LLM orchestrator',
-      context: 'AI4S competition · Completed',
-      thumb: '/stars/thumbs/neural-operator.svg',
-      highlights: [
-        { label: 'task1 best', value: '91.66' },
-        { label: 'task2 best', value: '88.93' },
-        { label: 'Scoring', value: 'Lorentzian · /100' },
-        { label: 'Autonomous trials', value: 'v1 — v20' },
-      ],
-      links: [],
-      sections: [
-        {
-          heading: 'Background',
-          body: 'The AI4S PDE competition asks for a neural operator that predicts 1D Burgers solutions with low error under a strict compute and data budget. Plain training or naive fine-tuning aren\'t enough — you need to solve the cold start, then keep improving across many reflection / restart rounds, where each round (training + evaluation) is not cheap. Babysitting hyperparameters by hand doesn\'t scale. This project hands the training loop itself to an agent, and lets the LLM decide where to go next.',
-        },
-        {
-          heading: 'Approach',
-          body: 'Transfer-fine-tune from the public PDEBench checkpoint; turn the training loop into an LLM-orchestrated multi-phase agent. Every round runs through the same five stages, each leaving a structured artifact — both for the agent to look back at, and for human audit.',
-          bullets: [
-            'SCAFFOLD — LLM drafts this round\'s design direction, family choice, and hyperparameter suggestions',
-            'TRAIN — schedule the PyTorch run; long tier gets 30 – 50 epochs of room to converge',
-            'EVAL — score across multiple splits, emit a JSON evidence pack',
-            'REFLECT — LLM reads scores and training logs, writes its own postmortem',
-            'DECIDE — keep going, roll back, or continue from any past trial (continue_from_trial)',
-          ],
-        },
-        {
-          heading: 'Architecture',
-          body: 'A single run takes half a day, and a single LLM call timing out in the middle kills the whole expensive loop. So a lot of the engineering went into "long runs don\'t die" — a stability layer that swallows external flakiness.',
-          bullets: [
-            'LLM proxy — 5xx / timeout / connection / 429 all unified into 6 retries with 5s base exponential backoff, ~315s total tolerance',
-            'Path discipline — PROJECT_ROOT pinned absolute, subprocess always called with absolute paths, proxy log dir locked',
-            'Trial chaining — any historical trial can become the start of the next round; the agent picks',
-            'Family A/B — two tracks running in parallel: simple FNO + pushforward, vs. ν-FiLM + estimator',
-          ],
-        },
-        {
-          heading: 'Key choices',
-          body: 'The most important call in the back half was knowing when to stop.',
-          bullets: [
-            'After simple FNO + pushforward hit 88.93 on task2, four subsequent family swaps all underperformed — accept the champion, stop chasing',
-            'Added a "family track record" table to the scaffold doc so the agent sees what has already failed, instead of choosing cold each time',
-            'When one run was killed by an upstream 502, the patched retry layer carried later trials through the same outage cleanly — proof that the stability layer was worth its complexity',
-            'Relative scoring lies: the Lorentzian score was misread by direction more than once early on, until we pinned down "higher total is better, verdict thresholds are absolute"',
-          ],
-        },
-        {
-          heading: 'Lessons',
-          body: 'The thing worth saying isn\'t the score — it\'s how to write rules for an agent.',
-          bullets: [
-            'Don\'t hand the agent "if you see X, do Y" methodology — give it mechanism and let it find its own rhythm',
-            'Human intuition overfits to the current round; the agent, averaged over many, is steadier',
-            'Simple families often beat sophisticated ones — as long as you give them enough epoch budget',
-            'Agent orchestration only works if the foundations are solid: get the proxy, paths, and evidence trail right first',
-          ],
-        },
-        {
-          heading: 'Status',
-          body: 'Best: 91.66 on task1, 88.93 on task2. Both submissions reviewed and archived (submission/code/{task1,task2}/), with an evidence trail that traces back to every LLM tool call. Sealed under the phase-9-exploration / phase-10 branches.',
-        },
-      ],
-    },
-    /* 3 ----------------------------------------------------------------- */
-    {
       slug: 'financial-analyst',
       category: 'LLM Agents · Multi-agent',
       title: '觀瀾 · Financial Analyst — A-Share Research Workstation',
@@ -356,7 +216,7 @@ const projects: Record<Lang, Project[]> = {
         { heading: 'Status', body: 'A stable release on PyPI (v1.0.6) with 712 tests; `fa start` is a zero-config one-command launch (wizard + backend + Web UI + browser auto-opens); 31 buddy tools and 5 swarm presets. Supports four LLM providers (qwen / deepseek / openai / anthropic) with hot-swap; Aliyun Bailian\'s 1M free-token credit covers ~150 reports. Datasets hosted on HuggingFace — demo 155 MB / lite 3 GB / full 14 GB; CN users get 3-10× acceleration via hf-mirror or ModelScope.' },
       ],
     },
-    /* 4 ----------------------------------------------------------------- */
+    /* 3 ----------------------------------------------------------------- */
     {
       slug: 'oss-scout',
       category: 'MCP · Tooling',
@@ -376,7 +236,7 @@ const projects: Record<Lang, Project[]> = {
         { heading: 'Status', body: 'v0.4 live in Claude Code user scope with all 8 tools shipping. Scorer is heuristic today, model-based once the local model is in place; profile is persisted in SQLite and feedback applies on the spot.' },
       ],
     },
-    /* 5 ----------------------------------------------------------------- */
+    /* 4 ----------------------------------------------------------------- */
     {
       slug: 'project-experience-mcp',
       category: 'MCP · Agent infrastructure',
@@ -394,7 +254,7 @@ const projects: Record<Lang, Project[]> = {
         { heading: 'Status', body: 'Mined and carded across several real projects: financial-analyst, weekly-agentmemory, memory-share, personalized-repo-mcp, paper-distiller, pde-phase8/10, ceramic-ai-predict, and more. Cards support search / archive; candidates flow through new / carded / rejected states.' },
       ],
     },
-    /* 6 ----------------------------------------------------------------- */
+    /* 5 ----------------------------------------------------------------- */
     {
       slug: 'paper-distiller',
       category: 'LLM Agents · Research tooling',
@@ -415,7 +275,7 @@ const projects: Record<Lang, Project[]> = {
         { heading: 'Status', body: 'Published on PyPI (MIT) with 436 tests; supports multiple LLM providers; cost-controlled — a deep distillation runs about ¥0.04 per paper.' },
       ],
     },
-    /* 7 ----------------------------------------------------------------- */
+    /* 6 ----------------------------------------------------------------- */
     {
       slug: 'jarvis',
       category: 'Personal agent',
